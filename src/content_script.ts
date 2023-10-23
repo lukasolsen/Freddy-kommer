@@ -1,6 +1,6 @@
 import { getRandomImage } from "./utils/utils";
 import { consoleLog, Severity } from "./styles/styles";
-import { YOUTUBE_VIDEO_QUERY, YOUTUBE_MAIN_PARENT_BODY } from "./env/paths";
+import { YOUTUBE_VIDEO_QUERY, YOUTUBE_SHORTS_QUERY } from "./env/paths";
 
 let images: Image[] = [];
 // just save the imagesChanged for checking weather a new change has been made
@@ -71,13 +71,10 @@ const applyOverlays = () => {
 };
 
 const identifyVideos = () => {
-  const shortsQueryThumbnail =
-    "#contents #content > ytd-rich-grid-slim-media > #dismissible > ytd-thumbnail > a > yt-image";
-
   const thumbnailElements: NodeListOf<HTMLElement> =
     document.querySelectorAll(YOUTUBE_VIDEO_QUERY);
   const shortsThumbnailElements: NodeListOf<HTMLElement> =
-    document.querySelectorAll(shortsQueryThumbnail);
+    document.querySelectorAll(YOUTUBE_SHORTS_QUERY);
 
   return [...thumbnailElements, ...shortsThumbnailElements];
 };
@@ -90,7 +87,7 @@ const start = async () => {
   //await preloadImages();
 
   const video = new MutationObserver(applyOverlays);
-  video.observe(document.querySelector(YOUTUBE_MAIN_PARENT_BODY), {
+  video.observe(document.body, {
     childList: true,
     subtree: true,
   });
