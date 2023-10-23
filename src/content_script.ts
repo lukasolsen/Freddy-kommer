@@ -1,8 +1,9 @@
 import { getRandomImage } from "./utils/utils";
 import { consoleLog, Severity } from "./styles/styles";
+import { YOUTUBE_VIDEO_QUERY, YOUTUBE_MAIN_PARENT_BODY } from "./env/paths";
 
 let images: Image[] = [];
-const loadedImages: { [url: string]: HTMLImageElement } = {};
+// just save the imagesChanged for checking weather a new change has been made
 
 const loadImages = async () => {
   const imageFileURL = chrome.runtime.getURL("/images.json");
@@ -20,35 +21,16 @@ const loadImages = async () => {
     });
 };
 
-const loadImage = async (image: Image): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      loadedImages[image?.url ?? image?.file ?? ""] = img;
-      resolve();
-    };
-    img.src = image?.url ?? image?.file ?? "";
-    img.onerror = reject;
-  });
-};
-
-const preloadImages = async () => {
-  const imageLoadPromises: Promise<void>[] = images.map(loadImage);
-  try {
-    await Promise.all(imageLoadPromises);
-  } catch (error) {
-    //console.error("Error loading images: ", error);
-    consoleLog(Severity.ERROR, "Error loading images: ", error);
-  }
-};
-
 // Apply the overlay
 function applyOverlay(
   thumbnailElement: HTMLElement,
   overlayImageURL: string,
   flip = false
 ) {
-  if (thumbnailElement.nodeName === "IMG") {
+  if (
+    thumbnailElement.nodeName === "IMG" ||
+    thumbnailElement.nodeName === "YT-IMAGE"
+  ) {
     // Create a new img element for the overlay
     const overlayImage = document.createElement("img");
     overlayImage.src = overlayImageURL;
@@ -64,6 +46,7 @@ function applyOverlay(
     thumbnailElement.style.position = "relative"; // Style the thumbnailElement to handle absolute positioning
     if (thumbnailElement.parentElement) {
       thumbnailElement.parentElement.appendChild(overlayImage);
+      thumbnailElement.dataset.tag = "Freddy Comin' For You";
     } else {
       console.warn("No parent element found");
     }
@@ -79,19 +62,24 @@ const applyOverlays = () => {
   consoleLog(Severity.INFO, "Applying overlays");
   const thumbnailElements = identifyVideos();
   thumbnailElements.forEach((thumbnailElement) => {
+    if (thumbnailElement.dataset?.tag === "Freddy Comin' For You") {
+      return;
+    }
     const randomImage = getRandomImage(images);
     applyOverlay(thumbnailElement, randomImage);
   });
 };
 
 const identifyVideos = () => {
-  const elementQueryThumbnail =
-    "ytd-thumbnail:not(.ytd-video-preview, .ytd-rich-grid-slim-media) a > yt-image > img.yt-core-image:only-child:not(.yt-core-attributed-string__image-element),.ytp-videowall-still-image:not([style*='extension:'])";
+  const shortsQueryThumbnail =
+    "#contents #content > ytd-rich-grid-slim-media > #dismissible > ytd-thumbnail > a > yt-image";
 
-  const thumbnailElements: NodeListOf<HTMLElement> = document.querySelectorAll(
-    elementQueryThumbnail
-  );
-  return thumbnailElements;
+  const thumbnailElements: NodeListOf<HTMLElement> =
+    document.querySelectorAll(YOUTUBE_VIDEO_QUERY);
+  const shortsThumbnailElements: NodeListOf<HTMLElement> =
+    document.querySelectorAll(shortsQueryThumbnail);
+
+  return [...thumbnailElements, ...shortsThumbnailElements];
 };
 
 const start = async () => {
@@ -99,10 +87,10 @@ const start = async () => {
   //consoleLog(Severity.INFO, "Starting MrBeastify extension");
   consoleLog(Severity.WELCOME);
   await loadImages();
-  await preloadImages();
+  //await preloadImages();
 
-  const observer = new MutationObserver(applyOverlays);
-  observer.observe(document.body, {
+  const video = new MutationObserver(applyOverlays);
+  video.observe(document.querySelector(YOUTUBE_MAIN_PARENT_BODY), {
     childList: true,
     subtree: true,
   });
