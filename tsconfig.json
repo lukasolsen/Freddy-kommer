@@ -7,6 +7,9 @@
 
     /* Type Checking */
     "strict": false /* Enable all strict type-checking options. */,
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+
+    // for types
+    "typeRoots": ["src/types/*", "node_modules/@types"]
   }
 }

@@ -1,24 +1,21 @@
-type Image = {
-  id: number;
-  name?: string;
-  description?: string;
-  date?: string;
-  file?: string;
-  url?: string;
-};
+import { getRandomImage } from "./utils/utils";
+import { consoleLog, Severity } from "./styles/styles";
 
 let images: Image[] = [];
 const loadedImages: { [url: string]: HTMLImageElement } = {};
 
 const loadImages = async () => {
   const imageFileURL = chrome.runtime.getURL("/images.json");
-  console.log("Loading images from " + imageFileURL);
+  //console.log("Loading images from " + imageFileURL);
+  consoleLog(Severity.INFO, "Loading images from " + imageFileURL);
 
   await fetch(imageFileURL)
     .then((response) => response.json())
     .then((json: Image[]) => {
-      console.log("Loaded images");
-      console.log(json);
+      //console.log("Loaded images");
+      consoleLog(Severity.INFO, "Loaded images");
+      //console.log(json);
+      consoleLog(Severity.INFO, json);
       images = json;
     });
 };
@@ -40,21 +37,9 @@ const preloadImages = async () => {
   try {
     await Promise.all(imageLoadPromises);
   } catch (error) {
-    console.error("Error loading images: ", error);
+    //console.error("Error loading images: ", error);
+    consoleLog(Severity.ERROR, "Error loading images: ", error);
   }
-};
-
-const getRandomImage = (): string => {
-  console.log("Getting random image");
-  const folder = "images/";
-
-  const numImages = images.length;
-  const randomIndex = Math.floor(Math.random() * numImages);
-  console.log("Random index: " + randomIndex);
-  return (
-    images[randomIndex]?.url ??
-    chrome.runtime.getURL("images/" + images[randomIndex]?.file)
-  );
 };
 
 // Apply the overlay
@@ -90,10 +75,11 @@ function applyOverlay(
 }
 
 const applyOverlays = () => {
-  console.log("Applying overlays");
+  //console.log("Applying overlays");
+  consoleLog(Severity.INFO, "Applying overlays");
   const thumbnailElements = identifyVideos();
   thumbnailElements.forEach((thumbnailElement) => {
-    const randomImage = getRandomImage();
+    const randomImage = getRandomImage(images);
     applyOverlay(thumbnailElement, randomImage);
   });
 };
@@ -109,7 +95,9 @@ const identifyVideos = () => {
 };
 
 const start = async () => {
-  console.log("Starting MrBeastify extension");
+  //console.log("Starting MrBeastify extension");
+  //consoleLog(Severity.INFO, "Starting MrBeastify extension");
+  consoleLog(Severity.WELCOME);
   await loadImages();
   await preloadImages();
 
