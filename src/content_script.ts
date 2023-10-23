@@ -27,10 +27,7 @@ function applyOverlay(
   overlayImageURL: string,
   flip = false
 ) {
-  if (
-    thumbnailElement.nodeName === "IMG" ||
-    thumbnailElement.nodeName === "YT-IMAGE"
-  ) {
+  if (thumbnailElement.nodeName === "IMG") {
     // Create a new img element for the overlay
     const overlayImage = document.createElement("img");
     overlayImage.src = overlayImageURL;
@@ -47,6 +44,7 @@ function applyOverlay(
     if (thumbnailElement.parentElement) {
       thumbnailElement.parentElement.appendChild(overlayImage);
       thumbnailElement.dataset.tag = "Freddy Comin' For You";
+      thumbnailElement.setAttribute("data-type", "overlay");
     } else {
       console.warn("No parent element found");
     }
@@ -79,12 +77,44 @@ const identifyVideos = () => {
   return [...thumbnailElements, ...shortsThumbnailElements];
 };
 
+// Check if all images that has the data-tag includes the current image, if not then redo it.
+const quickCheck = () => {
+  const thumbnailElements = identifyVideos();
+  thumbnailElements.forEach((thumbnailElement) => {
+    if (thumbnailElement.dataset?.tag !== "Freddy Comin' For You") {
+      return;
+    } else {
+      // loop around them, if 1 image does not have the data-type then ok, however if 2 or more does not have the data-type then reload the images.
+      // also if the data-type is more then once then reload the images.
+      let count = 0;
+      thumbnailElements.forEach((thumbnailElement) => {
+        if (thumbnailElement.dataset?.tag !== "Freddy Comin' For You") {
+          return;
+        } else {
+          if (count === 1) {
+            //remove the image
+            thumbnailElement.remove();
+            consoleLog(Severity.INFO, "Removed image");
+          }
+        }
+      });
+      if (count > 1 || count === 0) {
+        thumbnailElement.dataset.tag = "";
+      }
+    }
+  });
+};
+
 const start = async () => {
   //console.log("Starting MrBeastify extension");
   //consoleLog(Severity.INFO, "Starting MrBeastify extension");
   consoleLog(Severity.WELCOME);
   await loadImages();
-  //await preloadImages();
+
+  // in a new thread check if the images has changed, if so then reload the images.
+  setInterval(() => {
+    quickCheck();
+  }, 1000 * 5); // 5 seconds
 
   const video = new MutationObserver(applyOverlays);
   video.observe(document.body, {
