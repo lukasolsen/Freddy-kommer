@@ -43,10 +43,10 @@ function applyOverlay(
     thumbnailElement.style.position = "relative"; // Style the thumbnailElement to handle absolute positioning
     if (thumbnailElement.parentElement) {
       thumbnailElement.parentElement.appendChild(overlayImage);
-      thumbnailElement.dataset.tag = "Freddy Comin' For You";
+      thumbnailElement.setAttribute("data-tag", "Freddy Comin' For You");
       thumbnailElement.setAttribute("data-type", "overlay");
     } else {
-      console.warn("No parent element found");
+      consoleLog(Severity.WARNING, "No parent element found");
     }
   } else if (thumbnailElement.nodeName === "DIV") {
     thumbnailElement.style.backgroundImage =

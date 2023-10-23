@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Freddy Coming",
+  "name": "Funify",
   "version": "0.0.1",
   "icons": {
     "16": "icons/icon-16.png",
@@ -9,7 +9,7 @@
     "64": "icons/icon-64.png",
     "96": "icons/icon-96.png"
   },
-  "description": "Modify Youtube video images to custom images",
+  "description": "Say goodbye to dull and boring images on platforms like YouTube, and get ready to customize your online world with your favorite images.",
   "host_permissions": ["https://www.youtube.com/*"],
   "content_scripts": [
     {
@@ -20,7 +20,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["images/*.png", "images/*.json", "images.json"],
+      "resources": ["images/*", "images.json"],
       "matches": ["*://*/*"]
     }
   ]
