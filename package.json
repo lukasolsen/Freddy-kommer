@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@types/chrome": "^0.0.248",
+    "copy-webpack-plugin": "^11.0.0",
+    "ts-loader": "^9.5.0",
+    "webpack": "^5.89.0"
+  },
+  "scripts": {
+    "build": "webpack --config webpack/webpack.common.js",
+    "watch": "webpack --config webpack/webpack.common.js --watch"
+  },
+  "devDependencies": {
+    "webpack-cli": "^5.1.4"
+  }
+}
