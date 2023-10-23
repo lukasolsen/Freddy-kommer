@@ -6,7 +6,7 @@ Funify is a fantastic Chrome extension that brings a world of creativity to your
 
 Ready to have some fun? Follow these simple steps to install Funify:
 
-1. **Download**: Start by grabbing the latest release from the [releases page](https://github.com/lukasolsen/Funify). 📦
+1. **Download**: Start by grabbing the latest release from the [releases page](https://github.com/lukasolsen/Funify/releases). 📦
 
 2. **Unzip**: Unzip the downloaded file, revealing the treasure within. 💼
 

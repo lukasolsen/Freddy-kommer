@@ -1,4 +1,4 @@
-import { getRandomImage } from "./utils/utils";
+import { getRandomImage, checkImages } from "./utils/utils";
 import { consoleLog, Severity } from "./styles/styles";
 import { YOUTUBE_VIDEO_QUERY, YOUTUBE_SHORTS_QUERY } from "./env/paths";
 
@@ -13,11 +13,11 @@ const loadImages = async () => {
   await fetch(imageFileURL)
     .then((response) => response.json())
     .then((json: Image[]) => {
-      //console.log("Loaded images");
+      // TODO: Add a checker using regex to see if it is a valid image url or a image file.
+      const checkedImages = checkImages(json);
+
       consoleLog(Severity.INFO, "Loaded images");
-      //console.log(json);
-      consoleLog(Severity.INFO, json);
-      images = json;
+      images = checkedImages;
     });
 };
 

@@ -66,7 +66,7 @@ const consoleLog = (
   message?: any,
   ...optionalParams: any[]
 ) => {
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === "production") {
     switch (severity) {
       case Severity.INFO:
         console.log(
