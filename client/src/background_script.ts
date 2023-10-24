@@ -29,11 +29,14 @@ const connection = new Connection();
 const getImages = async () => {
   try {
     console.log("Fetching images");
-    const response = await fetch("/api/v2/images");
+    const response = await fetch("http://localhost:5000/api/v2/images");
     console.log("Response received", response);
     if (response.ok) {
       console.log("Images fetched", response);
-      return response;
+      //as json
+      const json = await response.json();
+
+      return json;
     } else {
       throw new Error("Failed to fetch images");
     }
