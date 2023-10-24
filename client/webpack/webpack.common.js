@@ -1,6 +1,7 @@
 const webpack = require("webpack");
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const HTMLPlugin = require("html-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
@@ -13,6 +14,8 @@ module.exports = {
     content_script: path.join(srcDir, "content_script.ts"),
     utils: path.join(srcDir, "utils/", "utils.ts"),
     styles: path.join(srcDir, "styles/", "styles.ts"),
+    //add popup
+    //popup: path.join(srcDir, "popup/", "index.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
@@ -36,12 +39,22 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js"],
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
   plugins: [
     new CopyPlugin({
       patterns: [{ from: ".", to: "../", context: "public" }],
       options: {},
     }),
+    ...getHtmlPlugins(["index"]),
   ],
 };
+
+function getHtmlPlugins(chunks) {
+  return chunks.map(
+    (chunk) =>
+      new HTMLPlugin({
+        filename: `${chunk}.html`,
+      })
+  );
+}
