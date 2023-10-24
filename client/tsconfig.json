@@ -10,8 +10,6 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
 
     // for types
-    "typeRoots": ["src/types/*", "node_modules/@types"],
-    //add react
-    "jsx": "react"
+    "typeRoots": ["src/types/*", "node_modules/@types"]
   }
 }

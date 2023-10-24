@@ -60,7 +60,7 @@ const startServer = async () => {
         await User.save(user);
         res.send({
           message: "User created successfully",
-          jwt: user.generateJWT(),
+          //jwt: user.generateJWT(),
         });
       } catch (e) {
         res.json({ error: "Incorrect credentials" });
@@ -139,11 +139,15 @@ const startServer = async () => {
     });
 
     app.get("/api/v2/images", async (req, res) => {
-      const images = await Image.find({
-        select: ["id", "name", "file_path"],
-      });
+      try {
+        const images = await Image.find({
+          select: ["id", "name", "file_path"],
+        });
 
-      res.json(images);
+        res.json(images ?? []);
+      } catch (e) {
+        res.json({ error: "Incorrect credentials" });
+      }
     });
 
     app.get("/api/v2/images/:user_id", async (req, res) => {

@@ -10,12 +10,11 @@ module.exports = {
   entry: {
     //popup: path.join(srcDir, 'popup.tsx'),
     //options: path.join(srcDir, 'options.tsx'),
-    //background: path.join(srcDir, 'background.ts'),
+    background: path.join(srcDir, "background_script.ts"),
     content_script: path.join(srcDir, "content_script.ts"),
     utils: path.join(srcDir, "utils/", "utils.ts"),
     styles: path.join(srcDir, "styles/", "styles.ts"),
-    //add popup
-    //popup: path.join(srcDir, "popup/", "index.tsx"),
+    popup: path.join(srcDir, "popup/", "popup.ts"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
@@ -36,25 +35,19 @@ module.exports = {
         use: "ts-loader",
         exclude: /node_modules/,
       },
+      {
+        test: /.(css|scss)$/,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
     ],
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx"],
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".html"],
   },
   plugins: [
     new CopyPlugin({
       patterns: [{ from: ".", to: "../", context: "public" }],
       options: {},
     }),
-    ...getHtmlPlugins(["index"]),
   ],
 };
-
-function getHtmlPlugins(chunks) {
-  return chunks.map(
-    (chunk) =>
-      new HTMLPlugin({
-        filename: `${chunk}.html`,
-      })
-  );
-}
