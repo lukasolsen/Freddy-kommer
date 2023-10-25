@@ -3,8 +3,8 @@ body {
   padding: 0;
   font-family: sans-serif;
 
-  width: 400px;
-  height: 300px;
+  width: 600px;
+  height: 400px;
   background-color: var(--background-color);
   color: var(--text-color) !important;
 }
@@ -23,8 +23,11 @@ button {
 }
 
 .header {
-  text-align: center;
-  font-size: larger;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  color: #fff; /* Text color for the header */
 }
 
 .container {
@@ -38,31 +41,29 @@ button {
 
 .tabs {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 10px;
+  gap: 20px;
 }
 
 .tab {
-  padding: 10px;
+  padding: 8px 16px;
   border: none;
   color: var(--text-color);
-  background-color: var(--button-background-color);
+  background-color: var(
+    --button-background-color
+  ); /* Background color for inactive tabs */
   cursor: pointer;
   border-radius: 0.25rem;
   transition: all 0.2s ease-in-out;
+  color: #fff; /* Text color for inactive tabs */
 }
 
 .tab:hover {
-  border-bottom: 1px solid var(--tab-bottom-border-color);
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
+  background-color: #555; /* Background color for tabs on hover */
 }
 
 .tab.active {
-  border-bottom: 1px solid var(--tab-bottom-border-color);
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
+  background-color: #007acc; /* Background color for the active tab */
+  font-weight: bold; /* Bold text for the active tab */
 }
 
 .list {
@@ -103,6 +104,119 @@ item > .item-footer {
   flex-direction: row;
   align-items: center;
   gap: 10px;
+}
+
+/* Style for the table */
+.custom-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.custom-table th,
+.custom-table td {
+  border: 1px solid #ddd;
+
+  padding: 8px;
+  text-align: left;
+}
+
+.custom-table th {
+  color: #fff; /* Header text color */
+}
+
+/* Style for the image */
+.image {
+  max-width: 100px; /* Set the maximum width for the image */
+  max-height: 100px; /* Set the maximum height for the image */
+  display: block; /* Remove any extra spacing around the image */
+  margin: 0 auto; /* Center the image within its container */
+}
+/* Style for the checkbox */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.customCheckbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.customCheckbox:checked + .slider {
+  background-color: #2196f3;
+}
+
+.customCheckbox:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.input-group > label {
+  font-weight: bold;
+}
+
+.input-group > input {
+  padding: 6px;
+  border-radius: 0.25rem;
+  border: none;
+  background-color: var(--button-background-color);
+  color: var(--text-color);
+}
+
+.hidden {
+  display: none;
 }
 
 :root {

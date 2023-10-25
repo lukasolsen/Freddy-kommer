@@ -4,7 +4,15 @@ class TabController {
   private selectedTab: string;
 
   constructor() {
-    this.selectedTab = "marketplace";
+    this.selectedTab = "home";
+
+    document.querySelectorAll(".tab-content").forEach((tabContent) => {
+      if (tabContent.id === this.selectedTab + "-content") {
+        tabContent.classList.remove("hidden");
+      } else {
+        tabContent.classList.add("hidden");
+      }
+    });
   }
 
   public getSelectedTab() {
@@ -13,8 +21,17 @@ class TabController {
 
   public setSelectedTab(tab: string) {
     this.selectedTab = tab;
+
+    document.querySelectorAll(".tab-content").forEach((tabContent) => {
+      if (tabContent.id === tab + "-content") {
+        tabContent.classList.remove("hidden");
+      } else {
+        tabContent.classList.add("hidden");
+      }
+    });
   }
 }
+const tabController = new TabController();
 
 class QueueSystem {
   private queue: any[];
@@ -70,7 +87,7 @@ document.querySelectorAll(".tab").forEach((tab) => {
       tab.classList.remove("active");
     });
     tab.classList.add("active");
-    const tabController = new TabController();
+
     tabController.setSelectedTab(tab.id);
     console.log(tabController.getSelectedTab());
   });
@@ -121,3 +138,89 @@ const addContentToList = (images: []) => {
     main.appendChild(item);
   });
 };
+
+const login = async (username, password) => {
+  try {
+    const response: any = await queueSystem.sendMessage({
+      message: "login",
+      username,
+      password,
+    });
+
+    console.log("Response received", response);
+
+    if (response.response.jwt) {
+      tabController.setSelectedTab("home");
+    }
+  } catch (error) {
+    console.error("Error sending or receiving a message:", error);
+  }
+};
+
+const register = async (username, password, email) => {
+  try {
+    const response: any = await queueSystem.sendMessage({
+      message: "register",
+      username,
+      password,
+      email,
+    });
+
+    console.log("Response received", response);
+    if (response.jwt) {
+      tabController.setSelectedTab("home");
+    }
+  } catch (error) {
+    console.error("Error sending or receiving a message:", error);
+  }
+};
+
+const isLoggedIn = async () => {
+  try {
+    const response: any = await queueSystem.sendMessage({
+      message: "isLoggedIn",
+    });
+
+    console.log("Response received", response);
+    if (response.jwt) {
+      tabController.setSelectedTab("home");
+    }
+  } catch (error) {
+    console.error("Error sending or receiving a message:", error);
+  }
+};
+
+const uploadImages = async (images) => {
+  try {
+    const response: any = await queueSystem.sendMessage({
+      message: "uploadImages",
+      images,
+    });
+
+    console.log("Response received", response);
+  } catch (error) {
+    console.error("Error sending or receiving a message:", error);
+  }
+};
+
+document.getElementById("login-button").addEventListener("click", () => {
+  const username = (<HTMLInputElement>document.getElementById("login_username"))
+    .value;
+  const password = (<HTMLInputElement>document.getElementById("login_password"))
+    .value;
+
+  login(username, password);
+});
+
+document.getElementById("register-button").addEventListener("click", () => {
+  const username = (<HTMLInputElement>(
+    document.getElementById("register_username")
+  )).value;
+  const password = (<HTMLInputElement>(
+    document.getElementById("register_password")
+  )).value;
+  const email = (<HTMLInputElement>document.getElementById("register_email"))
+    .value;
+
+  register(username, password, email);
+});

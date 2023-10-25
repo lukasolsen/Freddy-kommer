@@ -5,6 +5,7 @@ import {
   BaseEntity,
   OneToMany,
 } from "typeorm";
+import * as jwt from "jsonwebtoken";
 
 import { Image } from "./Image";
 
@@ -26,4 +27,15 @@ export class User extends BaseEntity {
     cascade: true,
   })
   images: Image[];
+
+  generateJWT() {
+    return jwt.sign(
+      {
+        id: this.id,
+        email: this.email,
+        username: this.username,
+      },
+      process.env.JWT_SECRET
+    );
+  }
 }

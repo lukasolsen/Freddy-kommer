@@ -4,21 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hello World</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
 
     <link rel="stylesheet" href="css/popup.css" />
   </head>
   <body>
     <div class="header">
-      <h1>Funify</h1>
+      <h2>Funify</h2>
+      <div class="tabs">
+        <button class="tab active" id="home">
+          Home <i class="fa-solid fa-house"></i>
+        </button>
+        <button class="tab" id="marketplace">
+          Marketplace
+          <i class="fa-solid fa-store"></i>
+        </button>
+        <button class="tab" id="login">
+          Sign in
+          <i class="fa-solid fa-sign-in"></i>
+        </button>
+      </div>
     </div>
     <div class="container">
-      <div class="tabs">
-        <button class="tab active" id="tab1">Marketplace</button>
-        <button class="tab" id="tab2">Settings</button>
-      </div>
-
       <tab>
-        <div class="tab-content" id="tab1-content">
+        <div class="tab-content" id="marketplace-content">
           <div class="header">
             <h2>Marketplace</h2>
           </div>
@@ -32,6 +47,105 @@
                 <button class="btn">Download</button>
               </div>
             </item>
+          </div>
+        </div>
+      </tab>
+
+      <tab>
+        <div class="tab-content" id="home-content">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              flex-direction: row;
+            "
+          >
+            <h2>Enabled Images</h2>
+            <button class="btn" id="addImage">Add Image</button>
+          </div>
+
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Enabled</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <img
+                    src="/images/anders1.png"
+                    alt="placeholder"
+                    class="image"
+                  />
+                </td>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" class="customCheckbox" />
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </tab>
+
+      <tab>
+        <div class="tab-content" id="login-content">
+          <div class="header">
+            <h2>Login</h2>
+          </div>
+          <div class="login">
+            <div>
+              <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="login_username" />
+              </div>
+              <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="login_password" />
+              </div>
+              <div class="input-group" style="margin-top: 40px">
+                <button class="btn" id="login-button">Login</button>
+              </div>
+            </div>
+            <p>
+              Don't have an account?
+              <button class="tab" id="register">Register here</button>
+            </p>
+          </div>
+        </div>
+      </tab>
+
+      <tab>
+        <div class="tab-content" id="register-content">
+          <div class="header">
+            <h2>Login</h2>
+          </div>
+          <div class="login">
+            <div>
+              <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="register_username" />
+              </div>
+              <div class="input-group">
+                <label for="username">Email</label>
+                <input type="email" name="email" id="register_email" />
+              </div>
+              <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="register_password" />
+              </div>
+              <div class="input-group" style="margin-top: 40px">
+                <button class="btn" id="register-button">Register</button>
+              </div>
+            </div>
+            <p>
+              Do you have an account?
+              <button class="tab" id="login">Sign in here!</button>
+            </p>
           </div>
         </div>
       </tab>
