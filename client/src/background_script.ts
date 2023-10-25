@@ -41,7 +41,10 @@ class Connection {
           }
         );
       } else if (message.message === "isLoggedIn") {
-        port.postMessage({ response: localStorage.getItem("jwt") !== null });
+        getStorage("jwt").then((jwt) => {
+          console.log("Sending response", !!jwt);
+          port.postMessage({ response: !!jwt });
+        });
       }
     });
   }

@@ -182,9 +182,7 @@ const isLoggedIn = async () => {
     });
 
     console.log("Response received", response);
-    if (response.jwt) {
-      tabController.setSelectedTab("home");
-    }
+    return response.response;
   } catch (error) {
     console.error("Error sending or receiving a message:", error);
   }
@@ -223,4 +221,23 @@ document.getElementById("register-button").addEventListener("click", () => {
     .value;
 
   register(username, password, email);
+});
+
+isLoggedIn().then((data) => {
+  console.log(data);
+  if (data === true) {
+    document.getElementById(
+      "signed-in"
+    ).innerHTML = `<button class="tab" id="logout">
+    Logout
+    <i class="fa-solid fa-sign-out"></i>
+    </button>`;
+  } else {
+    document.getElementById(
+      "signed-in"
+    ).innerHTML = `<button class="tab" id="login">
+    Login
+    <i class="fa-solid fa-sign-in"></i>
+    </button>`;
+  }
 });
