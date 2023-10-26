@@ -1,38 +1,5 @@
 let images = [];
 
-class TabController {
-  private selectedTab: string;
-
-  constructor() {
-    this.selectedTab = "home";
-
-    document.querySelectorAll(".tab-content").forEach((tabContent) => {
-      if (tabContent.id === this.selectedTab + "-content") {
-        tabContent.classList.remove("hidden");
-      } else {
-        tabContent.classList.add("hidden");
-      }
-    });
-  }
-
-  public getSelectedTab() {
-    return this.selectedTab;
-  }
-
-  public setSelectedTab(tab: string) {
-    this.selectedTab = tab;
-
-    document.querySelectorAll(".tab-content").forEach((tabContent) => {
-      if (tabContent.id === tab + "-content") {
-        tabContent.classList.remove("hidden");
-      } else {
-        tabContent.classList.add("hidden");
-      }
-    });
-  }
-}
-const tabController = new TabController();
-
 class QueueSystem {
   private queue: any[];
   private port: any;
@@ -79,21 +46,109 @@ class QueueSystem {
 
 const queueSystem = new QueueSystem();
 
-document.querySelectorAll(".tab").forEach((tab) => {
-  console.log("Tab found");
-  tab.addEventListener("click", () => {
-    console.log("Tab clicked");
-    document.querySelectorAll(".tab").forEach((tab) => {
-      tab.classList.remove("active");
+class TabController {
+  private selectedTab: string;
+
+  constructor() {
+    this.selectedTab = "home";
+
+    this.checkLogin();
+  }
+
+  public checkLogin = async () => {
+    const idLogged = await isLoggedIn();
+    if (idLogged === false) {
+      this.selectedTab = "login";
+      document.querySelectorAll(".tab-content").forEach((tabContent) => {
+        if (tabContent.id === "login" + "-content") {
+          tabContent.classList.remove("hidden");
+        } else {
+          tabContent.classList.add("hidden");
+        }
+      });
+    } else {
+      document.querySelectorAll(".tab-content").forEach((tabContent) => {
+        if (tabContent.id === this.selectedTab + "-content") {
+          tabContent.classList.remove("hidden");
+        } else {
+          tabContent.classList.add("hidden");
+        }
+      });
+    }
+  };
+
+  public getSelectedTab() {
+    return this.selectedTab;
+  }
+
+  public setSelectedTab(tab: string) {
+    this.selectedTab = tab;
+
+    document.querySelectorAll(".tab-content").forEach((tabContent) => {
+      if (tabContent.id === tab + "-content") {
+        tabContent.classList.remove("hidden");
+      } else {
+        tabContent.classList.add("hidden");
+      }
     });
-    tab.classList.add("active");
-
-    tabController.setSelectedTab(tab.id);
-    console.log(tabController.getSelectedTab());
-  });
-});
-
+  }
+}
 document.addEventListener("DOMContentLoaded", async () => {
+  const tabController = new TabController();
+  const login = async (username: string, password: string) => {
+    try {
+      const response: any = await queueSystem.sendMessage({
+        message: "login",
+        username,
+        password,
+      });
+
+      console.log("Response received", response);
+
+      if (response.response.jwt) {
+        tabController.setSelectedTab("home");
+      }
+    } catch (error) {
+      console.error("Error sending or receiving a message:", error);
+    }
+  };
+
+  const register = async (
+    username: string,
+    password: string,
+    email: string
+  ) => {
+    try {
+      const response: any = await queueSystem.sendMessage({
+        message: "register",
+        username,
+        password,
+        email,
+      });
+
+      console.log("Response received", response);
+      if (response.jwt) {
+        tabController.setSelectedTab("home");
+      }
+    } catch (error) {
+      console.error("Error sending or receiving a message:", error);
+    }
+  };
+
+  document.querySelectorAll(".tab").forEach((tab) => {
+    console.log("Tab found");
+    tab.addEventListener("click", () => {
+      console.log("Tab clicked");
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.remove("active");
+      });
+      tab.classList.add("active");
+
+      tabController.setSelectedTab(tab.id);
+      console.log(tabController.getSelectedTab());
+    });
+  });
+
   try {
     const response: any = await queueSystem.sendMessage({
       message: "getImages",
@@ -104,6 +159,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error("Error sending or receiving a message:", error);
   }
+
+  document.getElementById("login-button").addEventListener("click", () => {
+    const username = (<HTMLInputElement>(
+      document.getElementById("login_username")
+    )).value;
+    const password = (<HTMLInputElement>(
+      document.getElementById("login_password")
+    )).value;
+
+    login(username, password);
+  });
+
+  document.getElementById("register-button").addEventListener("click", () => {
+    const username = (<HTMLInputElement>(
+      document.getElementById("register_username")
+    )).value;
+    const password = (<HTMLInputElement>(
+      document.getElementById("register_password")
+    )).value;
+    const email = (<HTMLInputElement>document.getElementById("register_email"))
+      .value;
+
+    register(username, password, email);
+  });
+
+  isLoggedIn().then((data) => {
+    console.log(data);
+    if (data === true) {
+      document.getElementById(
+        "signed-in"
+      ).innerHTML = `<button class="tab" id="logout">
+      Logout
+      <i class="fa-solid fa-sign-out"></i>
+      </button>`;
+    } else {
+      document.getElementById(
+        "signed-in"
+      ).innerHTML = `<button class="tab" id="login">
+      Login
+      <i class="fa-solid fa-sign-in"></i>
+      </button>`;
+    }
+  });
 });
 
 const addContentToList = (images: []) => {
@@ -139,42 +237,6 @@ const addContentToList = (images: []) => {
   });
 };
 
-const login = async (username, password) => {
-  try {
-    const response: any = await queueSystem.sendMessage({
-      message: "login",
-      username,
-      password,
-    });
-
-    console.log("Response received", response);
-
-    if (response.response.jwt) {
-      tabController.setSelectedTab("home");
-    }
-  } catch (error) {
-    console.error("Error sending or receiving a message:", error);
-  }
-};
-
-const register = async (username, password, email) => {
-  try {
-    const response: any = await queueSystem.sendMessage({
-      message: "register",
-      username,
-      password,
-      email,
-    });
-
-    console.log("Response received", response);
-    if (response.jwt) {
-      tabController.setSelectedTab("home");
-    }
-  } catch (error) {
-    console.error("Error sending or receiving a message:", error);
-  }
-};
-
 const isLoggedIn = async () => {
   try {
     const response: any = await queueSystem.sendMessage({
@@ -201,43 +263,22 @@ const uploadImages = async (images) => {
   }
 };
 
-document.getElementById("login-button").addEventListener("click", () => {
-  const username = (<HTMLInputElement>document.getElementById("login_username"))
-    .value;
-  const password = (<HTMLInputElement>document.getElementById("login_password"))
-    .value;
-
-  login(username, password);
+document.getElementById("imageInput").addEventListener("change", (e) => {
+  sendImage(e.target as HTMLInputElement);
 });
 
-document.getElementById("register-button").addEventListener("click", () => {
-  const username = (<HTMLInputElement>(
-    document.getElementById("register_username")
-  )).value;
-  const password = (<HTMLInputElement>(
-    document.getElementById("register_password")
-  )).value;
-  const email = (<HTMLInputElement>document.getElementById("register_email"))
-    .value;
+function sendImage(input: HTMLInputElement) {
+  const selectedImage = document.getElementById(
+    "selectedImage"
+  ) as HTMLImageElement;
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
 
-  register(username, password, email);
-});
+    reader.onload = function (e) {
+      selectedImage.src = e.target.result as string;
+      selectedImage.style.display = "block";
+    };
 
-isLoggedIn().then((data) => {
-  console.log(data);
-  if (data === true) {
-    document.getElementById(
-      "signed-in"
-    ).innerHTML = `<button class="tab" id="logout">
-    Logout
-    <i class="fa-solid fa-sign-out"></i>
-    </button>`;
-  } else {
-    document.getElementById(
-      "signed-in"
-    ).innerHTML = `<button class="tab" id="login">
-    Login
-    <i class="fa-solid fa-sign-in"></i>
-    </button>`;
+    reader.readAsDataURL(input.files[0]);
   }
-});
+}

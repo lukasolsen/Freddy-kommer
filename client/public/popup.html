@@ -25,12 +25,6 @@
           Marketplace
           <i class="fa-solid fa-store"></i>
         </button>
-        <div id="signed-in">
-          <button class="tab" id="login">
-            Sign in
-            <i class="fa-solid fa-sign-in"></i>
-          </button>
-        </div>
       </div>
     </div>
     <div class="container">
@@ -63,7 +57,16 @@
             "
           >
             <h2>Enabled Images</h2>
-            <button class="btn" id="addImage">Add Image</button>
+            <label for="imageInput" class="custom-image-input">
+              <input class="btn" id="imageInput" type="file" accept="image/*" />
+              Add Image
+            </label>
+            <img
+              id="selectedImage"
+              class="selected-image"
+              src=""
+              alt="Selected Image"
+            />
           </div>
 
           <table class="custom-table">

@@ -185,7 +185,7 @@ const startServer = async () => {
 
         const image = new Image();
 
-        image.user_id = body.id;
+        image.user_id = req.user.id;
         image.name = body.name;
 
         image.created_at = new Date();
@@ -262,7 +262,7 @@ const startServer = async () => {
     );
 
     app.listen(process.env.port, () => {
-      console.log("Server is running at http://localhost:3000");
+      console.log("Server is running at http://localhost:" + process.env.port);
     });
   } catch (error) {
     console.error("Error initializing the database:", error);
