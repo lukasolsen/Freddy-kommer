@@ -139,7 +139,7 @@ const startServer = async () => {
           const userId = req?.user?.id;
 
           // Use the user ID to query your database and retrieve the user information
-          const user = await User.findOne({ id: userId });
+          const user = await User.findOne({ where: { id: userId } });
 
           if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -163,43 +163,49 @@ const startServer = async () => {
       jwt({ secret: process.env.JWT_SECRET, algorithms: ["HS256"] }),
       upload.single("image"),
       async (req, res) => {
-        // Get the JSON body data
-        const body = req.body;
-
-        if (!body) {
-          return res.status(400).json({ error: "No body provided" });
-        }
-        console.log(req.body.id);
-
-        if (!body.id || !body.name) {
-          return res
-            .status(400)
-            .json({ error: "Incorrect credentials provided" });
-        }
-
-        if (!req.file) {
-          return res.status(400).json({ error: "No file provided" });
-        }
-
-        console.log(req.body.id);
-
-        const image = new Image();
-
-        image.user_id = req.user.id;
-        image.name = body.name;
-
-        image.created_at = new Date();
-        image.updated_at = new Date();
-
-        image.file_path = req.file.path;
-
         try {
-          await Image.save(image);
-          res
-            .status(201)
-            .json({ message: "Image saved successfully", image_id: image.id });
-        } catch (error) {
-          console.error(error);
+          // Get the JSON body data
+          const body = req.body;
+
+          if (!body) {
+            //
+            return res.status(400).json({ error: "No body provided" });
+          }
+          const userId = req?.user?.id;
+
+          // Find the user in the database fro mthe decoded JWT
+          const user = await User.findOne({ where: { id: userId } });
+          console.log(user);
+          if (!user) {
+            return res.status(404).json({ error: "User not found" });
+          }
+
+          if (!req.file) {
+            return res.status(400).json({ error: "No file provided" });
+          }
+
+          const image = new Image();
+
+          image.user_id = user.id;
+          image.name = body.name;
+
+          image.created_at = new Date();
+          image.updated_at = new Date();
+
+          image.file_path = req.file.path;
+
+          try {
+            await Image.save(image);
+            res.status(201).json({
+              message: "Image saved successfully",
+              image_id: image.id,
+            });
+          } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal server error" });
+          }
+        } catch (e) {
+          console.error(e);
           res.status(500).json({ error: "Internal server error" });
         }
       }

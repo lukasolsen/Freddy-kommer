@@ -11,39 +11,45 @@ class Connection {
   public handleConnection(port: chrome.runtime.Port) {
     this.ports.add(port);
 
-    port.onMessage.addListener((message) => {
-      console.log("Message received", message);
-      if (message.message === "getImages") {
+    port.onMessage.addListener((content) => {
+      console.log("Message received", content);
+      console.log("Message received data", content.data);
+      console.log("Message received message", content.data.message);
+      if (content.data.message === "getImages") {
         console.log("getImages message received");
         getImages().then((images) => {
-          console.log("Sending response", images);
-          port.postMessage({ images });
+          console.log("Sending response Images", images);
+          port.postMessage({ data: images, id: content.id });
         });
       } else if (
-        message.message === "login" &&
-        message.username &&
-        message.password
+        content.data.message === "login" &&
+        content.data.username &&
+        content.data.password
       ) {
-        postLogin(message.username, message.password).then((response) => {
-          console.log("Sending response", response);
-          port.postMessage({ response });
-        });
-      } else if (
-        message.message === "register" &&
-        message.username &&
-        message.password &&
-        message.email
-      ) {
-        postRegister(message.username, message.password, message.email).then(
+        postLogin(content.data.username, content.data.password).then(
           (response) => {
             console.log("Sending response", response);
-            port.postMessage({ response });
+            port.postMessage({ data: response, id: content.id });
           }
         );
-      } else if (message.message === "isLoggedIn") {
+      } else if (
+        content.data.message === "register" &&
+        content.data.username &&
+        content.data.password &&
+        content.data.email
+      ) {
+        postRegister(
+          content.data.username,
+          content.data.password,
+          content.data.email
+        ).then((response) => {
+          console.log("Sending response", response);
+          port.postMessage({ data: response, id: content.id });
+        });
+      } else if (content.data.message === "isLoggedIn") {
         getStorage("jwt").then((jwt) => {
-          console.log("Sending response", !!jwt);
-          port.postMessage({ response: !!jwt });
+          console.log("Sending response isLoggedIn", !!jwt);
+          port.postMessage({ data: !!jwt, id: content.id });
         });
       }
     });
