@@ -1,27 +1,44 @@
 import { Severity, consoleLog } from "../styles/styles";
+import {
+  addImage,
+  addImageToStorage,
+  getImagesFromJSON,
+  getImagesFromStorage,
+  reloadImages,
+  removeAllDisplayedImages,
+} from "./service";
 
-document.onload = function () {
-  const container = document.getElementById("container");
-  const addButton = document.getElementById("addButton");
-  const removeButton = document.getElementById("removeButton");
+const addButton = document.getElementById("addButton");
 
-  // Get all the images from images.json
-  const imageFileURL = chrome.runtime.getURL("/images.json");
-  //console.log("Loading images from " + imageFileURL);
-  consoleLog(Severity.INFO, "Loading images from " + imageFileURL);
+let images: Image[] = [];
 
-  const images: Image[] = [];
-
-  fetch(imageFileURL)
-    .then((response) => response.json())
-    .then((json: Image[]) => {
-      images.push(...json);
-    });
-
-  addButton.addEventListener("click", () => {
-    // Go into the images file, then add a new image to the images.json file
-    // Then, refresh the page
-
-    
+getImagesFromJSON().then((res) => {
+  images.push(...res);
+  res.forEach((image) => {
+    addImage(image);
   });
-};
+});
+
+getImagesFromStorage().then((res) => {
+  images.push(...res);
+  res.forEach((image) => {
+    addImage(image);
+  });
+});
+
+addButton.addEventListener("click", async () => {
+  // add a new image to the json, then reload the website
+  const value = document.getElementById("imageInput") as HTMLInputElement;
+  // Add the image to the storage
+  await addImageToStorage(value.value);
+  // Reload all the images from the storage
+  removeAllDisplayedImages();
+  await reloadImages().then((allImages) => {
+    images = [];
+    images = [...allImages];
+  });
+
+  images.forEach((image) => {
+    addImage(image);
+  });
+});

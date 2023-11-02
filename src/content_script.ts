@@ -16,9 +16,16 @@ const loadImages = async () => {
       // TODO: Add a checker using regex to see if it is a valid image url or a image file.
       const checkedImages = checkImages(json);
 
-      consoleLog(Severity.INFO, "Loaded images");
       images = checkedImages;
     });
+
+  // get the images from chrome storage
+  chrome.storage.local.get("images", (result) => {
+    consoleLog(Severity.INFO, "Loaded images from chrome storage", result);
+    result.images.map((image: Image) => {
+      images.push(image);
+    });
+  });
 };
 
 // Apply the overlay
@@ -37,6 +44,8 @@ function applyOverlay(
     overlayImage.style.width = "100%";
     overlayImage.style.height = "100%";
     overlayImage.style.zIndex = "0"; // Ensure overlay is on top but below the time indicator
+    overlayImage.style.pointerEvents = "none"; // Allow clicks to pass through to the thumbnail below
+    overlayImage.style.objectFit = "cover"; // Scale the image to fit
     if (flip) {
       overlayImage.style.transform = "scaleX(-1)"; // Flip the image horizontally
     }
