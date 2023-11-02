@@ -1,67 +1,61 @@
-class Connection {
-  ports: Set<chrome.runtime.Port>;
+const sendRequestResponse = async (
+  requestKey: string,
+  req: Promise<unknown>,
+  sender,
+  variables
+) => {
+  const url = sender?.tab?.url;
+  const [deviceId, res] = await Promise.all(["helloWorld", req]);
 
-  constructor() {
-    this.ports = new Set();
+  return chrome.tabs.sendMessage(sender?.tab?.id, {
+    deviceId,
+    url,
+    res,
+    req: { variables },
+    requestKey,
+  });
+};
 
-    chrome.runtime.onConnect.addListener((port) => {
-      this.handleConnection(port);
-    });
+const sendBootData = async (_, tab) => {
+  await chrome.tabs.sendMessage(tab.id, {
+    type: "BOOT_DATA",
+    jwt: await getStorage("jwt"),
+  });
+};
+
+async function handleMessages(message: Record<string, any>, sender) {
+  if (message.type === "CHECK_PERMISSIONS") {
+    sendBootData("hello world", sender);
+    return;
+  } else if (message.type === "FETCH_REQUEST") {
+    const { requestKey } = message.args.headers || {};
+
+    const req = await fetch(message.url, { ...message.args });
+
+    if (!requestKey) {
+      return req;
+    }
+
+    return sendRequestResponse(
+      requestKey,
+      req.json(),
+      sender,
+      message.args.variables
+    );
   }
-  public handleConnection(port: chrome.runtime.Port) {
-    this.ports.add(port);
-
-    port.onMessage.addListener((content) => {
-      console.log("Message received", content);
-      console.log("Message received data", content.data);
-      console.log("Message received message", content.data.message);
-      if (content.data.message === "getImages") {
-        console.log("getImages message received");
-        getImages().then((images) => {
-          console.log("Sending response Images", images);
-          port.postMessage({ data: images, id: content.id });
-        });
-      } else if (
-        content.data.message === "login" &&
-        content.data.username &&
-        content.data.password
-      ) {
-        postLogin(content.data.username, content.data.password).then(
-          (response) => {
-            console.log("Sending response", response);
-            port.postMessage({ data: response, id: content.id });
-          }
-        );
-      } else if (
-        content.data.message === "register" &&
-        content.data.username &&
-        content.data.password &&
-        content.data.email
-      ) {
-        postRegister(
-          content.data.username,
-          content.data.password,
-          content.data.email
-        ).then((response) => {
-          console.log("Sending response", response);
-          port.postMessage({ data: response, id: content.id });
-        });
-      } else if (content.data.message === "isLoggedIn") {
-        getStorage("jwt").then((jwt) => {
-          console.log("Sending response isLoggedIn", !!jwt);
-          port.postMessage({ data: !!jwt, id: content.id });
-        });
-      }
-    });
-  }
+  return null;
 }
 
-const connection = new Connection();
+chrome.runtime.onMessage.addListener(handleMessages);
 
-const getStorage = async (key) => {
+const getStorage = (key) => {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (result) => {
-      resolve(result[key]);
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(result[key]);
+      }
     });
   });
 };

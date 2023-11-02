@@ -6,74 +6,6 @@ type ImageType = {
   file_path: string;
 };
 
-class QueueSystem {
-  private queue: any[];
-  private port: any;
-  private messageListeners: { [id: string]: ((message: any) => void)[] } = {};
-
-  constructor() {
-    this.queue = [];
-    this.port = null;
-
-    this.setupConnection();
-    this.listenToMessages();
-  }
-
-  setupConnection() {
-    this.port = chrome.runtime.connect({ name: "content" });
-  }
-
-  public listenToMessages(): any {
-    this.port.onMessage.addListener((message: any) => {
-      console.log("Message received", message);
-      if (message && message.id) {
-        console.log("Message received 123", message);
-        return message;
-      }
-    });
-  }
-
-  public addToQueue(item: any) {
-    this.queue.push(item);
-  }
-
-  public removeFromQueue(item: any) {
-    this.queue = this.queue.filter((queueItem) => queueItem !== item);
-  }
-
-  public getQueue() {
-    return this.queue;
-  }
-
-  private generateId() {
-    return Math.floor(Math.random() * 1000000000).toString();
-  }
-
-  public addMessageListener(id: string, listener: (message: any) => void) {
-    if (!this.messageListeners[id]) {
-      this.messageListeners[id] = [];
-    }
-    this.messageListeners[id].push(listener);
-  }
-
-  public removeMessageListener(id: string, listener: (message: any) => void) {
-    if (this.messageListeners[id]) {
-      this.messageListeners[id] = this.messageListeners[id].filter(
-        (l) => l !== listener
-      );
-    }
-  }
-
-  async sendMessage(message: any): Promise<any> {
-    const id = this.generateId();
-    // Get the queue's first item, and send it to the background script, then wait for a response.
-    this.port.postMessage({ data: message, id: id });
-    return id;
-  }
-}
-
-const queueSystem = new QueueSystem();
-
 class TabController {
   private selectedTab: string;
 
@@ -85,7 +17,7 @@ class TabController {
 
   public checkLogin = async () => {
     const idLogged = await isLoggedIn();
-    if (idLogged === false) {
+    if (idLogged !== undefined || idLogged !== null) {
       this.selectedTab = "login";
       document.querySelectorAll(".tab-content").forEach((tabContent) => {
         if (tabContent.id === "login" + "-content") {
@@ -121,27 +53,29 @@ class TabController {
     });
   }
 }
+
+async function requestFromBackground(obj) {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage(obj, (response) => {
+      resolve(response);
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const tabController = new TabController();
 
   const login = async (username: string, password: string) => {
     try {
-      const id = queueSystem.sendMessage({
+      const response = await chrome.runtime.sendMessage({
         message: "login",
         username,
         password,
       });
-      // you get id from sendMessage. Use the lsitener functio nto listen for the responses, then check the id.
-      // if the id matches, then do something with the response.
-      // if the id does not match, then do nothing.
 
-      const response = await queueSystem.listenToMessages();
-      console.log("Response received", response);
-      if (response.id === id) {
-        console.log("Login response received", response);
-        if (response.data.jwt) {
-          tabController.setSelectedTab("home");
-        }
+      console.log("Login response received", response);
+      if (response.data.jwt) {
+        tabController.setSelectedTab("home");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -154,19 +88,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     email: string
   ) => {
     try {
-      const id = queueSystem.sendMessage({
+      const response = await chrome.runtime.sendMessage({
         message: "register",
         username,
         password,
         email,
       });
 
-      const response = await queueSystem.listenToMessages();
-      if (response.id === id) {
-        console.log("Register response received", response);
-        if (response.data.jwt) {
-          tabController.setSelectedTab("home");
-        }
+      console.log("Register response received", response);
+      if (response.data.jwt) {
+        tabController.setSelectedTab("home");
       }
     } catch (error) {
       console.error("Register error:", error);
@@ -199,20 +130,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         <i class="fa-solid fa-sign-out"></i>
         </button>`;*/
 
-      const response: ImageType[] = await queueSystem.sendMessage({
-        message: "getImages",
-      });
+      async () => {
+        const response = await chrome.runtime.sendMessage({
+          message: "getImages",
+        });
 
-      console.log("Response received images:", response);
-      addContentToList(response);
+        console.log("Response received images:", response);
+        addContentToList(response.data);
+      };
     } else {
+      console.log("User is not logged in");
       /*document.getElementById(
         "signed-in"
       ).innerHTML = `<button class="tab" id="login">
         Login
         <i class="fa-solid fa-sign-in"></i>
         </button>`;*/
-      console.log("User is not logged in");
     }
   } catch (error) {
     console.error("Error sending or receiving a message:", error);
@@ -280,17 +213,11 @@ const addContentToList = (images: ImageType[]) => {
 
 const isLoggedIn = async () => {
   try {
-    const id: any = queueSystem.sendMessage({
-      message: "isLoggedIn",
-    });
+    const response = await requestFromBackground({ type: "CHECK_PERMISSIONS" });
 
-    const response = await queueSystem.listenToMessages();
-    console.log("Response received", response);
+    console.log("IsLoggedIn response received 123", response);
 
-    if (response?.id === id) {
-      console.log("IsLoggedIn response received", response);
-      return response.data;
-    }
+    return response;
   } catch (error) {
     console.error("Error sending or receiving a message:", error);
   }
@@ -306,7 +233,7 @@ const uploadImages = async (image: { name: string; file: File }) => {
     // append the image name
     formData.append("name", name);
 
-    const response = await queueSystem.sendMessage({
+    const response = await chrome.runtime.sendMessage({
       message: "uploadImages",
       data: formData, // Send the FormData object with the image
     });
