@@ -15,7 +15,7 @@ export const getImagesFromJSON = async () => {
 export const getImagesFromStorage = async () => {
   return new Promise<Image[]>((resolve, reject) => {
     chrome.storage.local.get("images", (result) => {
-      resolve(result.images);
+      resolve(result?.images || []);
     });
   });
 };
