@@ -1,6 +1,7 @@
 const webpack = require("webpack");
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const HTMLPlugin = require("html-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
@@ -9,7 +10,7 @@ module.exports = {
   entry: {
     //popup: path.join(srcDir, 'popup.tsx'),
     //options: path.join(srcDir, 'options.tsx'),
-    //background: path.join(srcDir, 'background.ts'),
+    background: path.join(srcDir, "background_script.ts"),
     content_script: path.join(srcDir, "content_script.ts"),
     utils: path.join(srcDir, "utils/", "utils.ts"),
     styles: path.join(srcDir, "styles/", "styles.ts"),
@@ -34,10 +35,14 @@ module.exports = {
         use: "ts-loader",
         exclude: /node_modules/,
       },
+      {
+        test: /.(css|scss)$/,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
     ],
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js"],
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".html"],
   },
   plugins: [
     new CopyPlugin({
