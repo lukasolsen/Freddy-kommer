@@ -56,7 +56,10 @@ export const addImage = (image: Image) => {
   const mainDiv = document.createElement("div");
 
   const imageElement = document.createElement("img");
-  imageElement.src = url;
+  if (imageElement !== undefined) {
+    imageElement.src = url;
+  } else {
+  }
 
   const actions = document.createElement("div");
   actions.className = "actions";

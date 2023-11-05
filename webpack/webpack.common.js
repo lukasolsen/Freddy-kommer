@@ -15,12 +15,14 @@ module.exports = {
     utils: path.join(srcDir, "utils/", "utils.ts"),
     styles: path.join(srcDir, "styles/", "styles.ts"),
     popup: path.join(srcDir, "popup/", "popup.ts"),
+    index: path.join(srcDir, "popup/", "index.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
     filename: "[name].js",
   },
   optimization: {
+    usedExports: true,
     splitChunks: {
       name: "vendor",
       chunks(chunk) {
