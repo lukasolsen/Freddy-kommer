@@ -107,6 +107,42 @@ const getStorageValue = async (key: string) => {
   });
 };
 
+const changeSettings = async (type: string, key: string, value: any) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get("settings", (result) => {
+      if (result.settings === undefined) {
+        result.settings = {};
+      }
+
+      if (result.settings[type] === undefined) {
+        result.settings[type] = {};
+      }
+
+      result.settings[type][key] = value;
+
+      chrome.storage.local.set({ settings: result.settings }, () => {
+        resolve(result.settings);
+      });
+    });
+  });
+};
+
+const getSetting = async (type: string, key: string) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get("settings", (result) => {
+      if (result.settings === undefined) {
+        result.settings = {};
+      }
+
+      if (result.settings[type] === undefined) {
+        result.settings[type] = {};
+      }
+
+      resolve(result.settings[type][key]);
+    });
+  });
+};
+
 const getCurrentTab = async () => {
   return window.location.href;
 };
@@ -120,4 +156,6 @@ export {
   addStorageValue,
   getStorageValue,
   getCurrentTab,
+  changeSettings,
+  getSetting,
 };

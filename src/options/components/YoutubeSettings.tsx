@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Switch, InputNumber, Upload, Button, Typography, Badge } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { changeSettings, getSetting } from "../../utils/utils";
 
 interface NewFeatureBadgeProps {
   isNew: boolean;
@@ -11,36 +12,53 @@ const NewFeatureBadge: React.FC<NewFeatureBadgeProps> = ({ isNew }) => {
 };
 
 const YoutubeSettings: React.FC = () => {
+  const [enabled, setEnabled] = useState(false);
   const [replaceThumbnails, setReplaceThumbnails] = useState(false);
   const [reactionVideo, setReactionVideo] = useState(false);
-  const [thumbnailCheckFrequency, setThumbnailCheckFrequency] = useState(24); // in hours
-  const [reactionVideoDuration, setReactionVideoDuration] = useState(30); // in seconds
 
-  const handleThumbnailCheckFrequencyChange = (value: number | undefined) => {
-    if (value !== undefined) {
-      setThumbnailCheckFrequency(value);
-    }
-  };
+  useEffect(() => {
+    const getData = async () => {
+      getSetting("youtube", "enabled").then((value: boolean) => {
+        console.log(value);
+        setEnabled(value);
+      });
 
-  const handleReactionVideoDurationChange = (value: number | undefined) => {
-    if (value !== undefined) {
-      setReactionVideoDuration(value);
-    }
-  };
+      getSetting("youtube", "replaceThumbnails").then((value: boolean) => {
+        setReplaceThumbnails(value);
+      });
 
-  const handleThumbnailUpload = (info: any) => {
-    // Handle thumbnail upload logic
-    console.log(info.fileList);
-  };
+      getSetting("youtube", "reactionVideo").then((value: boolean) => {
+        setReactionVideo(value);
+      });
+    };
+
+    getData();
+  }, []);
 
   return (
     <div>
       <Typography.Title level={3}>YouTube Settings</Typography.Title>
+      {/* enabled.. */}
+      <div style={{ marginBottom: "16px" }}>
+        <label>Enabled</label>
+        <Switch
+          checked={enabled}
+          onChange={(checked) => {
+            console.log(checked);
+            setEnabled(checked);
+            changeSettings("youtube", "enabled", checked);
+          }}
+        />
+      </div>
+
       <div style={{ marginBottom: "16px" }}>
         <label>Replace Thumbnails:</label>
         <Switch
           checked={replaceThumbnails}
-          onChange={(checked) => setReplaceThumbnails(checked)}
+          onChange={(checked) => {
+            setReplaceThumbnails(checked);
+            changeSettings("youtube", "replaceThumbnails", checked);
+          }}
         />
       </div>
       <div style={{ marginBottom: "16px" }}>
@@ -50,38 +68,11 @@ const YoutubeSettings: React.FC = () => {
         </label>
         <Switch
           checked={reactionVideo}
-          onChange={(checked) => setReactionVideo(checked)}
+          onChange={(checked) => {
+            setReactionVideo(checked);
+            changeSettings("youtube", "reactionVideo", checked);
+          }}
         />
-        {reactionVideo && (
-          <div>
-            <label>Reaction Video Duration (seconds):</label>
-            <InputNumber
-              min={1}
-              value={reactionVideoDuration}
-              onChange={handleReactionVideoDurationChange}
-            />
-          </div>
-        )}
-      </div>
-      <div style={{ marginBottom: "16px" }}>
-        <label>Check for new thumbnails every:</label>
-        <InputNumber
-          min={1}
-          max={24 * 7} // 7 days
-          value={thumbnailCheckFrequency}
-          onChange={handleThumbnailCheckFrequencyChange}
-        />
-        <span> hours</span>
-      </div>
-      <div style={{ marginBottom: "16px" }}>
-        <label>Custom Thumbnail:</label>
-        <Upload
-          beforeUpload={() => false}
-          onChange={handleThumbnailUpload}
-          showUploadList={false}
-        >
-          <Button icon={<UploadOutlined />}>Upload</Button>
-        </Upload>
       </div>
     </div>
   );

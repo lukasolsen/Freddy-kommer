@@ -1,6 +1,6 @@
 import { Severity, consoleLog } from "../styles/styles";
-import { getRandomImage } from "../utils/utils";
-import { YOUTUBE_SHORTS_QUERY, YOUTUBE_VIDEO_QUERY } from "../env/paths";
+import { getRandomImage, getSetting } from "../utils/utils";
+import { YOUTUBE_SHORTS_QUERY, YOUTUBE_VIDEO_QUERY } from "../constants";
 
 class Youtube {
   private images: Image[];
@@ -99,20 +99,88 @@ class Youtube {
     }
   }
 
+  private reaction = () => {
+    // Check if the current url is a youtube video
+    // If it is then apply a abselute div with an image
+
+    if (window.location.href.includes("youtube.com/watch")) {
+      console.log(
+        document.querySelector(".html5-video-container")?.children?.length
+      );
+      if (
+        document.querySelector(".html5-video-container")?.children?.length > 1
+      ) {
+        return;
+      }
+
+      console.log(
+        document.querySelector('[data-tag="Reaction-Video-Present"]')
+      );
+
+      // Check if a reaction video is already there. If it is just return, if not then continue.
+      if (document.querySelector('[data-tag="Reaction-Video-Present"]')) {
+        return;
+      }
+
+      // Apply overlay
+      const randomImage = getRandomImage(this.images);
+      console.log(randomImage);
+      const elem = document.createElement("div");
+      elem.style.position = "absolute";
+      elem.style.top = "0";
+      elem.style.left = "0";
+      elem.style.zIndex = "1000000000";
+      elem.style.width = "25%";
+      elem.setAttribute("data-tag", "Reaction-Video-Present");
+
+      const img = document.createElement("img");
+      img.src = randomImage;
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+      img.style.pointerEvents = "none";
+      elem.appendChild(img);
+
+      document.querySelector(".html5-video-container").appendChild(elem);
+    }
+  };
+
   public run(): void {
-    this.applyOverlays();
+    getSetting("youtube", "enabled").then((enabled) => {
+      if (!enabled) {
+        return;
+      }
 
-    setInterval(() => {
-      this.checker();
-    }, 1000 * 5);
+      getSetting("youtube", "replaceThumbnails").then((replaceThumbnails) => {
+        if (replaceThumbnails) {
+          this.applyOverlays();
 
-    const video = new MutationObserver(() => {
-      this.applyOverlays();
-    });
+          setInterval(() => {
+            this.checker();
+          }, 1000 * 5);
 
-    video.observe(document.body, {
-      childList: true,
-      subtree: true,
+          const video = new MutationObserver(() => {
+            this.applyOverlays();
+          });
+          video.observe(document.body, {
+            childList: true,
+            subtree: true,
+          });
+        }
+      });
+
+      getSetting("youtube", "reactionVideo").then((reactionVideo) => {
+        if (reactionVideo) {
+          this.reaction();
+          const video = new MutationObserver(() => {
+            this.reaction();
+          });
+          video.observe(document.body, {
+            childList: true,
+            subtree: true,
+          });
+        }
+      });
     });
   }
 }
