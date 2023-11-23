@@ -5,4 +5,6 @@ type Image = {
   date?: string;
   file?: string;
   url?: string;
+  locations?: string[];
+  tags?: string[];
 };

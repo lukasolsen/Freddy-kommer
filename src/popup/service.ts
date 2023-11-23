@@ -1,4 +1,5 @@
 import { Severity, consoleLog } from "../styles/styles";
+import { getImagesFromStorage, removeItem } from "../utils/utils";
 
 const imageFileURL = chrome.runtime.getURL("images.json");
 
@@ -12,14 +13,6 @@ export const getImagesFromJSON = async () => {
   return images;
 };
 
-export const getImagesFromStorage = async () => {
-  return new Promise<Image[]>((resolve, reject) => {
-    chrome.storage.local.get("images", (result) => {
-      resolve(result?.images || []);
-    });
-  });
-};
-
 export const reloadImages = async () => {
   const images = [];
 
@@ -30,19 +23,6 @@ export const reloadImages = async () => {
   images.push(...imagesFromStorage);
 
   return images;
-};
-
-export const removeItem = async (id: number) => {
-  // Remove the image from the json, then reload the website
-  const images = await getImagesFromStorage();
-
-  if (!images) {
-    return;
-  }
-  const filteredImages = images.filter((image) => image.id !== id);
-  chrome.storage.local.set({ images: filteredImages }, () => {
-    consoleLog(Severity.INFO, "Removed image " + id);
-  });
 };
 
 export const addImage = (image: Image) => {
@@ -99,19 +79,4 @@ export const removeAllImages = async () => {
 export const removeAllDisplayedImages = () => {
   const container = document.getElementById("collection");
   container.innerHTML = "";
-};
-
-export const addImageToStorage = async (imageUrl: string) => {
-  // Add an image to the images.json file
-  // Refresh the page
-  const image = {
-    id: Math.floor(Math.random() * 1000000),
-    url: imageUrl,
-  };
-  // Store it locally to chrome storage
-  const images = await getImagesFromStorage();
-
-  images.push(image);
-
-  chrome.storage.local.set({ images: images });
 };

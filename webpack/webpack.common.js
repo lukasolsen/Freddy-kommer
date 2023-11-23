@@ -8,14 +8,11 @@ module.exports = {
   mode: "production",
 
   entry: {
-    //popup: path.join(srcDir, 'popup.tsx'),
-    //options: path.join(srcDir, 'options.tsx'),
-    background: path.join(srcDir, "background_script.ts"),
     content_script: path.join(srcDir, "content_script.ts"),
     utils: path.join(srcDir, "utils/", "utils.ts"),
     styles: path.join(srcDir, "styles/", "styles.ts"),
-    popup: path.join(srcDir, "popup/", "popup.ts"),
     index: path.join(srcDir, "popup/", "index.tsx"),
+    options: path.join(srcDir, "options/", "index.tsx"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),

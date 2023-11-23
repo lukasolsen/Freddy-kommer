@@ -1,137 +1,56 @@
-import { getRandomImage, checkImages } from "./utils/utils";
+import {
+  getRandomImage,
+  checkImages,
+  loadImages,
+  getCurrentTab,
+} from "./utils/utils";
 import { consoleLog, Severity } from "./styles/styles";
-import { YOUTUBE_VIDEO_QUERY, YOUTUBE_SHORTS_QUERY } from "./env/paths";
+
+import Youtube from "./loaders/Youtube";
 
 let images: Image[] = [];
-// just save the imagesChanged for checking weather a new change has been made
 
-const loadImages = async () => {
-  const imageFileURL = chrome.runtime.getURL("/images.json");
-  //console.log("Loading images from " + imageFileURL);
-  consoleLog(Severity.INFO, "Loading images from " + imageFileURL);
+const reactionFeature = () => {
+  // Check if the current url is a youtube video
+  // If it is then apply a abselute div with an image
 
-  await fetch(imageFileURL)
-    .then((response) => response.json())
-    .then((json: Image[]) => {
-      // TODO: Add a checker using regex to see if it is a valid image url or a image file.
-      const checkedImages = checkImages(json);
+  if (chrome.tabs.query({ active: true, currentWindow: true })) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const url = tabs[0].url;
+      if (url.includes("youtube.com/watch")) {
+        // Apply overlay
+        const randomImage = getRandomImage(images);
+        const elem = document.createElement("div");
+        elem.style.position = "absolute";
+        elem.style.top = "0";
+        elem.style.left = "0";
+        elem.style.zIndex = "1000000000";
+        elem.style.width = "100%";
 
-      images = checkedImages;
-    });
+        const img = document.createElement("img");
+        img.src = randomImage;
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        img.style.pointerEvents = "none";
+        elem.appendChild(img);
 
-  // get the images from chrome storage
-  chrome.storage.local.get("images", (result) => {
-    consoleLog(Severity.INFO, "Loaded images from chrome storage", result);
-    result.images.map((image: Image) => {
-      images.push(image);
-    });
-  });
-};
-
-// Apply the overlay
-function applyOverlay(
-  thumbnailElement: HTMLElement,
-  overlayImageURL: string,
-  flip = false
-) {
-  if (thumbnailElement.nodeName === "IMG") {
-    // Create a new img element for the overlay
-    const overlayImage = document.createElement("img");
-    overlayImage.src = overlayImageURL;
-    overlayImage.style.position = "absolute";
-    overlayImage.style.top = "0";
-    overlayImage.style.left = "0";
-    overlayImage.style.width = "100%";
-    overlayImage.style.height = "100%";
-    overlayImage.style.zIndex = "0"; // Ensure overlay is on top but below the time indicator
-    overlayImage.style.pointerEvents = "none"; // Allow clicks to pass through to the thumbnail below
-    overlayImage.style.objectFit = "cover"; // Scale the image to fit
-    if (flip) {
-      overlayImage.style.transform = "scaleX(-1)"; // Flip the image horizontally
-    }
-    thumbnailElement.style.position = "relative"; // Style the thumbnailElement to handle absolute positioning
-    if (thumbnailElement.parentElement) {
-      thumbnailElement.parentElement.appendChild(overlayImage);
-      thumbnailElement.setAttribute("data-tag", "Freddy Comin' For You");
-      thumbnailElement.setAttribute("data-type", "overlay");
-    } else {
-      consoleLog(Severity.WARNING, "No parent element found");
-    }
-  } else if (thumbnailElement.nodeName === "DIV") {
-    thumbnailElement.style.backgroundImage =
-      `url("${overlayImageURL}"), ` +
-      (thumbnailElement.style.backgroundImage || "");
-  }
-}
-
-const applyOverlays = () => {
-  //console.log("Applying overlays");
-  consoleLog(Severity.INFO, "Applying overlays");
-  const thumbnailElements = identifyVideos();
-  thumbnailElements.forEach((thumbnailElement) => {
-    if (thumbnailElement.dataset?.tag === "Freddy Comin' For You") {
-      return;
-    }
-    const randomImage = getRandomImage(images);
-    applyOverlay(thumbnailElement, randomImage);
-  });
-};
-
-const identifyVideos = () => {
-  const thumbnailElements: NodeListOf<HTMLElement> =
-    document.querySelectorAll(YOUTUBE_VIDEO_QUERY);
-  const shortsThumbnailElements: NodeListOf<HTMLElement> =
-    document.querySelectorAll(YOUTUBE_SHORTS_QUERY);
-
-  return [...thumbnailElements, ...shortsThumbnailElements];
-};
-
-// Check if all images that has the data-tag includes the current image, if not then redo it.
-const quickCheck = () => {
-  const thumbnailElements = identifyVideos();
-  thumbnailElements.forEach((thumbnailElement) => {
-    if (thumbnailElement.dataset?.tag !== "Freddy Comin' For You") {
-      return;
-    } else {
-      // loop around them, if 1 image does not have the data-type then ok, however if 2 or more does not have the data-type then reload the images.
-      // also if the data-type is more then once then reload the images.
-      let count = 0;
-      thumbnailElements.forEach((thumbnailElement) => {
-        if (thumbnailElement.dataset?.tag !== "Freddy Comin' For You") {
-          return;
-        } else {
-          if (count === 1) {
-            //remove the image
-            thumbnailElement.remove();
-            consoleLog(Severity.INFO, "Removed image");
-          }
-        }
-      });
-      if (count > 1 || count === 0) {
-        thumbnailElement.dataset.tag = "";
+        document.querySelector(".html5-video-container")?.appendChild(elem);
       }
-    }
-  });
+    });
+  }
 };
 
 const start = async () => {
-  //console.log("Starting MrBeastify extension");
-  //consoleLog(Severity.INFO, "Starting MrBeastify extension");
   consoleLog(Severity.WELCOME);
-  await loadImages();
-
-  // in a new thread check if the images has changed, if so then reload the images.
-  setInterval(() => {
-    quickCheck();
-  }, 1000 * 5); // 5 seconds
-
-  const video = new MutationObserver(applyOverlays);
-  video.observe(document.body, {
-    childList: true,
-    subtree: true,
+  await loadImages().then((loadedImages) => {
+    images = checkImages(loadedImages);
   });
 
-  applyOverlays();
+  if ((await getCurrentTab()).includes("youtube.com")) {
+    const youtube = new Youtube(images);
+    youtube.run();
+  }
 };
 
 start();

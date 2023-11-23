@@ -11,7 +11,7 @@
   },
   "description": "Say goodbye to dull and boring images on platforms like YouTube, and get ready to customize your online world with your favorite images.",
   "host_permissions": ["https://www.youtube.com/*"],
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
@@ -35,5 +35,6 @@
     },
     "default_title": "Funify",
     "default_popup": "popup.html"
-  }
+  },
+  "options_page": "options.html"
 }
