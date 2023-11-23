@@ -58,11 +58,11 @@ const ImagesSettings: React.FC = () => {
       <Typography.Title level={3}>Images Settings</Typography.Title>
       <Flex vertical={true} gap={"middle"}>
         <div>
-          <label>Name (optional):</label>
+          <Typography.Text>Name (optional):</Typography.Text>
           <Input onChange={(e) => handleNameChange(e.target.value)} />
         </div>
         <div>
-          <label>Tags (optional):</label>
+          <Typography.Text>Tags (optional):</Typography.Text>
           <Select
             mode="tags"
             style={{ width: "100%" }}
@@ -71,7 +71,7 @@ const ImagesSettings: React.FC = () => {
           />
         </div>
         <div>
-          <label>Locations:</label>
+          <Typography.Text>Locations:</Typography.Text>
           <Select
             mode="multiple"
             style={{ width: "100%" }}

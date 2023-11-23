@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layout, Menu, Switch, Typography, Badge } from "antd";
+import { Layout, Menu, Switch, Typography, Badge, MenuItemProps } from "antd";
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
@@ -42,7 +42,7 @@ const App: React.FC = () => {
             Funify
           </Typography.Title>
         </div>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={["youtube"]}>
           <Menu.Item
             key="youtube"
             onClick={() => setSelectedMenu("youtube")}

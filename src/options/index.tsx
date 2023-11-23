@@ -24,6 +24,8 @@ createRoot(document.getElementById("root")).render(
           colorBgContainer: "#282E33",
           colorText: "#fff",
           colorPrimaryTextActive: "#579DFF",
+          colorPrimaryBg: "#282E33",
+          darkItemBg: "#282E33",
         },
       },
     }}
