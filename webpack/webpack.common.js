@@ -5,7 +5,9 @@ const HTMLPlugin = require("html-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
-  mode: "production",
+  // Make it without eval
+  devtool: "inline-source-map",
+  mode: "development",
 
   entry: {
     content_script: path.join(srcDir, "content_script.ts"),
@@ -49,4 +51,8 @@ module.exports = {
       options: {},
     }),
   ],
+  watchOptions: {
+    ignored: /node_modules/,
+    poll: 1000,
+  },
 };

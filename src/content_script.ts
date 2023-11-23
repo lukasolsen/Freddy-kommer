@@ -10,8 +10,6 @@ import Youtube from "./loaders/Youtube";
 
 let images: Image[] = [];
 
-
-
 const start = async () => {
   consoleLog(Severity.WELCOME);
   await loadImages().then((loadedImages) => {
